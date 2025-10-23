@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load-lib, message = FALSE}
 library(tidyverse)
 # Add any other libraries here
+library(NHANES)
 
 
 
@@ -25,7 +26,9 @@ library(tidyverse)
 
 ```{r load-data}
 # load your data 
-
+data("NHANES")
+data("NHANES",package="NHANES")
+write.csv(NHANES,"data/NHANES.csv",row.names=FALSE)
 
 
 

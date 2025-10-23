@@ -29,9 +29,8 @@ library(NHANES)
 data("NHANES")
 data("NHANES",package="NHANES")
 write.csv(NHANES,"data/NHANES.csv",row.names=FALSE)
-
-
-
+health<-read.csv("data/NHANES.csv")
+names(health)
 ```
 
 

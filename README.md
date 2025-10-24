@@ -33,6 +33,7 @@ There will be two check-in points where you will have a discussion with a tutor 
 ## Check-in 1 (week 6)
 
 - item 1
+  How drugs and alcohol influence physic and mental health?
 - item 2
 - etc.
 

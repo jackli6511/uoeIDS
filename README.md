@@ -35,6 +35,10 @@ There will be two check-in points where you will have a discussion with a tutor 
 - item 1
   How drugs and alcohol influence physic and mental health?
 - item 2
+  Find and delete some wrong data.
+  Think about the meanings of the data,some may be different from what I have thought.
+  Choosing the data that will be used.
+  The types of the data(If they can be used in caculation?)
 - etc.
 
 ## Check-in 2 (week 10)

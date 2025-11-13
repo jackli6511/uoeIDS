@@ -51,4 +51,50 @@ data_c<-data_c %>% mutate(TotalDrugs=Marij+Drugs)
 data_c
 ```
 
+```{r load-data}
 
+# load your data
+data("NHANES")
+data("NHANES", package="NHANES")
+write.csv(NHANES, "data/NHANES.csv", row.names = FALSE)
+
+health <- read.csv("data/NHANES.csv")
+
+data_r <- health %>% select(
+  ID,
+  DaysPhysHlthBad,
+  DaysMentHlthBad,
+  SleepHrsNight,
+  SleepTrouble
+)
+ 
+data_cl <- data_r %>% drop_na()
+
+
+data_cl <- data_cl %>% mutate(
+  Trouble = case_when(
+    SleepTrouble == "No"  ~ 0,
+    SleepTrouble == "Yes" ~ 1
+  )
+)
+
+data_cl <- data_cl %>% mutate(
+  SleepCat = case_when(
+    SleepHrsNight < 6 ~ "Short",
+    SleepHrsNight >= 6 & SleepHrsNight <= 8 ~ "Normal",
+    SleepHrsNight > 8 ~ "Long"
+  )
+)
+
+data_end <- data_cl %>% select(
+  ID,
+  DaysPhysHlthBad,
+  DaysMentHlthBad,
+  SleepHrsNight,
+  Trouble,
+  SleepCat
+)
+
+data_end
+
+```

@@ -18,9 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 # Add any other libraries here
 library(NHANES)
-
-
-
+library(patchwork)
+library(tidymodels)
 ```
 
 
@@ -47,8 +46,146 @@ data_c <- data_c %>% mutate(
   )
 )
 data_c<-data_c %>% select(ID,DaysPhysHlthBad,DaysMentHlthBad,AlcoholYear,Marij,Drugs)
-data_c<-data_c %>% mutate(TotalDrugs=Marij+Drugs)
-data_c
+data_c<-data_c %>% mutate(Drugsindex=Marij+Drugs)
+data_c<-data_c %>% mutate(TotalUnhealthy=DaysPhysHlthBad+DaysMentHlthBad)
+data_c <- data_c %>% mutate(
+  healthstatus=case_when(
+    TotalUnhealthy<=14~0,
+    TotalUnhealthy>=15~1
+  )
+)
+data_c <- data_c %>% mutate(
+  Alcoholindex=case_when(
+    AlcoholYear==0~0,
+    AlcoholYear<=52~1,
+    AlcoholYear<=104~2,
+    AlcoholYear<=156~3,
+    AlcoholYear>156~4
+  )
+)
+data_h<-data_c %>% select(ID,Drugsindex,Alcoholindex,healthstatus)
+set.seed(511)
+data_split <- initial_split(data_h, prop = 0.80,strata=healthstatus)
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+
+my_theme <- theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        legend.position = "bottom")
+
+p1 <- ggplot(train_data, aes(x = factor(Alcoholindex))) +
+  geom_bar(fill = "steelblue", alpha = 0.8) +
+  labs(title = "Alcohol Index Distribution", x = "Alcohol Index", y = "Frequency") +
+  my_theme
+
+p2 <- ggplot(train_data, aes(x = factor(Drugsindex))) +
+  geom_bar(fill = "coral", alpha = 0.8) +
+  labs(title = "Drug Index Distribution", x = "Drug Index", y = "Frequency") +
+  my_theme
+
+p3 <- ggplot(train_data, aes(x = factor(healthstatus))) +
+  geom_bar(fill = "darkgreen", alpha = 0.8) +
+  labs(title = "Health Status Distribution", x = "Health Status (0=Unhealthy, 1=Healthy)",          y="Frequency") +
+  my_theme
+(p1 | p2 | p3) + plot_annotation(title = "Variable Distribution Overview")
+
+p4 <- ggplot(train_data, aes(x = factor(Alcoholindex), fill = factor(healthstatus))) +
+  geom_bar(position = "fill") +
+  labs(title = "Health Status Proportions by Alcohol Index", 
+       x = "Alcohol Index", 
+       y = "Proportion",
+       fill = "Health Status") +
+  scale_fill_manual(values = c("0" = "red", "1" = "green"),
+                    labels = c("Unhealthy", "Healthy")) +
+  my_theme
+
+p5 <- ggplot(train_data, aes(x = factor(Drugsindex), fill = factor(healthstatus))) +
+  geom_bar(position = "fill") +
+  labs(title = "Health Status Proportions by Drug Index", 
+       x = "Drug Index", 
+       y = "Proportion",
+       fill = "Health Status") +
+  scale_fill_manual(values = c("0" = "red", "1" = "green"),
+                    labels = c("Unhealthy", "Healthy")) +
+  my_theme
+p4 / p5
+
+p7 <- ggplot(train_data, aes(x = factor(healthstatus), y = Alcoholindex, fill = factor(healthstatus))) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Alcohol Index Distribution by Health Status", 
+       x = "Health Status", 
+       y = "Alcohol Index",
+       fill = "Health Status") +
+  scale_fill_manual(values = c("0" = "red", "1" = "green"),
+                    labels = c("Unhealthy", "Healthy")) +
+  scale_x_discrete(labels = c("Unhealthy", "Healthy")) +
+  my_theme
+
+p8 <- ggplot(train_data, aes(x = factor(healthstatus), y = Drugsindex, fill = factor(healthstatus))) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Drug Index Distribution by Health Status", 
+       x = "Health Status", 
+       y = "Drug Index",
+       fill = "Health Status") +
+  scale_fill_manual(values = c("0" = "red", "1" = "green"),
+                    labels = c("Unhealthy", "Healthy")) +
+  scale_x_discrete(labels = c("Unhealthy", "Healthy")) +
+  my_theme
+p7 / p8
+
+train_data <- train_data %>%
+  mutate(
+    Alcoholindex = factor(Alcoholindex),
+    Drugsindex = factor(Drugsindex),
+    healthstatus = factor(healthstatus, levels = c(0, 1), labels = c("unHealthy", "Healthy"))
+  )
+
+test_data <- test_data %>%
+  mutate(
+    Alcoholindex = factor(Alcoholindex),
+    Drugsindex = factor(Drugsindex),
+    healthstatus = factor(healthstatus, levels = c(0, 1), labels = c("unHealthy", "Healthy"))
+  )
+
+model_fit <- logistic_reg() %>% 
+  set_engine("glm") %>% 
+  fit(healthstatus ~ Alcoholindex + Drugsindex, 
+      data = train_data, 
+      family = "binomial")
+model_summary <- tidy(model_fit)
+model_summary
+
+test_predictions <- predict(model_fit, new_data = test_data, type = "prob") %>%
+  bind_cols(
+    predict(model_fit, new_data = test_data, type = "class"),
+    test_data %>% select(healthstatus)
+  )
+test_predictions
+
+roc_curve <- test_predictions %>%
+  roc_curve(
+    truth = healthstatus,
+    .pred_Healthy, 
+    event_level = "second"  
+  )
+roc_plot <- roc_curve %>%
+  autoplot() +
+  labs(
+    title = "ROC Curve for Health Status Prediction",
+    subtitle = "Alcohol and Drug Indices as Predictors"
+  ) +
+  my_theme +
+  theme(legend.position = "none")
+roc_plot
+
+auc_value <- test_predictions %>%
+  roc_auc(
+    truth = healthstatus,
+    .pred_Healthy,
+    event_level = "second"
+  )
+auc_value
+
 ```
 
 

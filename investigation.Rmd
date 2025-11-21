@@ -85,7 +85,7 @@ p2 <- ggplot(train_data, aes(x = factor(Drugsindex))) +
 
 p3 <- ggplot(train_data, aes(x = factor(healthstatus))) +
   geom_bar(fill = "darkgreen", alpha = 0.8) +
-  labs(title = "Health Status Distribution", x = "Health Status (0=Unhealthy, 1=Healthy)",          y="Frequency") +
+  labs(title = "HealthStatusDistribution", x = "Health Status",          y="Frequency") +
   my_theme
 pa<-(p1 | p2 | p3) + plot_annotation(title = "Variable Distribution Overview")
 pa
@@ -185,7 +185,10 @@ auc_value <- test_predictions %>%
     event_level = "second"
   )
 auc_value
-
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p1.png",plot=pa)
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p2.png",plot=pb)
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p3.png",plot=pc)
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p4.png",plot=roc_plot)
 ```
 
 ```{r load-data}

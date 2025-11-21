@@ -87,8 +87,8 @@ p3 <- ggplot(train_data, aes(x = factor(healthstatus))) +
   geom_bar(fill = "darkgreen", alpha = 0.8) +
   labs(title = "Health Status Distribution", x = "Health Status (0=Unhealthy, 1=Healthy)",          y="Frequency") +
   my_theme
-(p1 | p2 | p3) + plot_annotation(title = "Variable Distribution Overview")
-
+pa<-(p1 | p2 | p3) + plot_annotation(title = "Variable Distribution Overview")
+pa
 p4 <- ggplot(train_data, aes(x = factor(Alcoholindex), fill = factor(healthstatus))) +
   geom_bar(position = "fill") +
   labs(title = "Health Status Proportions by Alcohol Index", 

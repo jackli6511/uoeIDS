@@ -50,8 +50,8 @@ data_c<-data_c %>% mutate(Drugsindex=Marij+Drugs)
 data_c<-data_c %>% mutate(TotalUnhealthy=DaysPhysHlthBad+DaysMentHlthBad)
 data_c <- data_c %>% mutate(
   healthstatus=case_when(
-    TotalUnhealthy<=14~0,
-    TotalUnhealthy>=15~1
+    TotalUnhealthy<=14~1,
+    TotalUnhealthy>=15~0
   )
 )
 data_c <- data_c %>% mutate(

@@ -108,8 +108,8 @@ p5 <- ggplot(train_data, aes(x = factor(Drugsindex), fill = factor(healthstatus)
   scale_fill_manual(values = c("0" = "red", "1" = "green"),
                     labels = c("Unhealthy", "Healthy")) +
   my_theme
-p4 / p5
-
+pb<-p4 / p5
+pb
 p7 <- ggplot(train_data, aes(x = factor(healthstatus), y = Alcoholindex, fill = factor(healthstatus))) +
   geom_boxplot(alpha = 0.7) +
   labs(title = "Alcohol Index Distribution by Health Status", 
@@ -131,8 +131,8 @@ p8 <- ggplot(train_data, aes(x = factor(healthstatus), y = Drugsindex, fill = fa
                     labels = c("Unhealthy", "Healthy")) +
   scale_x_discrete(labels = c("Unhealthy", "Healthy")) +
   my_theme
-p7 / p8
-
+pc<-p7 / p8
+pc
 train_data <- train_data %>%
   mutate(
     Alcoholindex = factor(Alcoholindex),

@@ -1,7 +1,7 @@
 ---
-title: "Presentation title"
+title: "IDS investigation worksheet"
 subtitle: "Presentation subtitle (if any)"
-author: "Team name <br> Names of team members"
+author: "by IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong"
 institute: "University of Edinburgh"
 date: "`r Sys.Date()`"
 output:

@@ -185,10 +185,10 @@ auc_value <- test_predictions %>%
     event_level = "second"
   )
 auc_value
-ggsave("C:/Users/Jack/Documents/uoeIDS/img/p1.png",plot=pa)
-ggsave("C:/Users/Jack/Documents/uoeIDS/img/p2.png",plot=pb)
-ggsave("C:/Users/Jack/Documents/uoeIDS/img/p3.png",plot=pc)
-ggsave("C:/Users/Jack/Documents/uoeIDS/img/p4.png",plot=roc_plot)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p1.png",plot=pa)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p2.png",plot=pb)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p3.png",plot=pc)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p4.png",plot=roc_plot)
 ```
 
 ```{r load-data}
@@ -239,7 +239,7 @@ data_end
 data_end <- data_end %>%
   mutate(Trouble = factor(Trouble, levels = c(0, 1),
                           labels = c("No Trouble", "Trouble")))
-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+p5<-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
   geom_bar() +
   labs(
     title = "Sleep Trouble by Sleep Duration Category",
@@ -248,7 +248,8 @@ ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
     fill = "Sleep Trouble"
   ) +
   theme_minimal()
-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+p5
+p6<-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = scales::percent) +
   labs(
@@ -258,6 +259,7 @@ ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
     fill = "Sleep Trouble"
   ) +
   theme_minimal()
+p6
 set.seed(123)
 
 # Make sure Trouble is a factor (done above, but just to be safe)
@@ -282,15 +284,17 @@ roc_df <- roc_curve(test_preds,
                     truth = Trouble,       
                     .pred_Trouble)          
 
-autoplot(roc_df) +
+roc2<-autoplot(roc_df) +
   labs(
     title = "ROC Curve for Sleep Trouble Model",
     x = "1 - Specificity",
     y = "Sensitivity"
   )
-
+roc2
 roc_auc(test_preds,
         truth = Trouble,
         .pred_Trouble)
-
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p5.png",plot=p5)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p6.png",plot=p6)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p7.png",plot=roc2)
 ```

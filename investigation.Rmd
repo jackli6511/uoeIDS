@@ -191,7 +191,7 @@ auc_value
 #ggsave("C:/Users/Jack/Documents/uoeIDS/img/p4.png",plot=roc_plot)
 ```
 
-```{r load-data}
+```{r load-daa}
 
 # load your data
 data("NHANES")

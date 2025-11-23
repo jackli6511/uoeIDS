@@ -1,7 +1,7 @@
 ---
-title: "Presentation title"
-subtitle: "Presentation subtitle (if any)"
-author: "Team name <br> Names of team members"
+title: "The Factors Influence Health"
+subtitle: "Alcohol Drug SleepingHours SleepingTrouble"
+author: "Handsome Yue <br> Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong"
 institute: "University of Edinburgh"
 date: "`r Sys.Date()`"
 output:
@@ -53,15 +53,23 @@ style_xaringan(
 
 class: center, middle
 
-## A statement of the overall goal / research question
+## If we can predict people's health status?
 
 ---
 
 class: inverse, center, middle
 
-# Section title
+# Alcohol and Drug
 
 ---
+# Distribution 
+
+```{r p1, echo = FALSE, out.width = "55%", fig.align = "center"}
+include_graphics("img/p1.png")
+```
+
+---
+
 
 # Hello World
 

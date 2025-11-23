@@ -1,7 +1,7 @@
 ---
-title: "IDS investigation worksheet"
-subtitle: 
-author: "IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong"
+title: "Presentation title"
+subtitle: "Presentation subtitle (if any)"
+author: "Team name <br> Names of team members"
 institute: "University of Edinburgh"
 date: "`r Sys.Date()`"
 output:
@@ -28,8 +28,7 @@ install.packages('xaringan')
 # Add any additional packages you need to this chunk
 library(tidyverse)
 library(tidymodels)
-library(NHANES)
-library(patchwork)
+library(palmerpenguins)
 library(knitr)
 library(xaringanthemer)
 ```
@@ -42,171 +41,27 @@ knitr::opts_chunk$set(fig.retina = 3, dpi = 300, fig.width = 6, fig.asp = 0.618,
 ```{r load-data, include=FALSE}
 # Load your data here
 
-
-data("NHANES")
-health_raw <- NHANES
-
-data_ad <- health_raw %>%
-  select(ID, DaysPhysHlthBad, DaysMentHlthBad, AlcoholYear, RegularMarij, HardDrugs) %>%
-  drop_na() %>%
-  mutate(
-    Marij = ifelse(RegularMarij=="No",0,1),
-    Drugs = ifelse(HardDrugs=="No",0,2),
-    Drugsindex = Marij+Drugs,
-    Alcoholindex = case_when(
-      AlcoholYear==0~0, AlcoholYear<=52~1, AlcoholYear<=104~2, AlcoholYear<=156~3, AlcoholYear>156~4
-    ),
-    TotalUnhealthy = DaysPhysHlthBad+DaysMentHlthBad,
-    healthstatus = ifelse(TotalUnhealthy<=14,1,0)
-  ) %>%
-  select(ID, Drugsindex, Alcoholindex, healthstatus)
-
-set.seed(511)
-data_split <- initial_split(data_ad, prop=0.8, strata=healthstatus)
-train_data <- training(data_split)
-test_data <- testing(data_split)
-
-data_sleep <- health_raw %>%
-  select(ID, DaysPhysHlthBad, DaysMentHlthBad, SleepHrsNight, SleepTrouble) %>%
-  drop_na() %>%
-  mutate(
-    Trouble = ifelse(SleepTrouble=="No",0,1),
-    SleepCat = case_when(SleepHrsNight<6~"Short", SleepHrsNight<=8~"Normal", SleepHrsNight>8~"Long"),
-    TotalUnhealthy = DaysPhysHlthBad+DaysMentHlthBad
-  )
-
 ```
-
-
-
-
 
 ```{r include=FALSE}
 
 #Background image
-
+style_xaringan(
+  title_slide_background_image = "img/confetti.jpg"
+)
 ```
-
-
-
-
-
 
 class: center, middle
 
-## Health Investigation: Alcohol, Drugs, and Sleep
-## NHANES Dataset Analysis
-
-<span style="font-size: 28px;">1. How do alcohol and drug use impact health status?</span>
-
-
-<span style="font-size: 28px;">2. What is the relationship between sleep duration, sleep trouble, and health?</span>
-
-
+## A statement of the overall goal / research question
 
 ---
-# Data & Variable Encoding
 
-## Data Source
-- **NHANES Dataset** (National Health and Nutrition Examination Survey) – a U.S. national health survey with demographic, health, and lifestyle data.
+class: inverse, center, middle
 
-## Key Variables
-| Variable         | Encoding Logic                                  |
-|------------------|-------------------------------------------------|
-| Health Status    | ≤14 unhealthy days → *Healthy (1)*; ≥15 → *Unhealthy (0)* |
-| Alcohol Index    | 0 (no alcohol) → 1 (≤52 days) → 2 (≤104 days) → 3 (≤156 days) → 4 (>156 days) |
-| Drug Index       | 0 (no use) → 1 (marijuana only) → 2 (hard drugs / both) |
-| Sleep Duration   | Short (<6h), Normal (6-8h), Long (>8h)          |
-| Sleep Trouble    | 0 (no), 1 (yes)                                 |
+# Section title
 
 ---
-# Distribution of Core Variables
-
-```{r var-dist, echo=FALSE, fig.width=12, fig.height=6}
-my_theme <- theme_minimal() + theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))
-
-p1 <- ggplot(train_data, aes(x = factor(Alcoholindex))) +
-  geom_bar(fill = "steelblue", alpha = 0.8) +
-  labs(title = "Alcohol Index Distribution", x = "Alcohol Index (0-4)", y = "Count") + my_theme
-
-p2 <- ggplot(train_data, aes(x = factor(Drugsindex))) +
-  geom_bar(fill = "coral", alpha = 0.8) +
-  labs(title = "Drug Index Distribution", x = "Drug Index (0-2)", y = "Count") + my_theme
-
-p3 <- ggplot(train_data, aes(x = factor(healthstatus))) +
-  geom_bar(fill = "darkgreen", alpha = 0.8) +
-  labs(title = "Health Status Distribution", x = "Health Status (0=Unhealthy, 1=Healthy)", y = "Count") + my_theme
-
-(p1 | p2 | p3) + plot_annotation(title = "Core Variable Distributions")
-
-  
-```
-
----
-# Alcohol Index & Health Status
-#Drug Index & Health Status
-
-```{r alcohol-drug-health-plots, echo=FALSE, fig.width=10, fig.height=12}
-my_theme <- theme_minimal() + 
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-        legend.position = "bottom")
-
-p4 <- ggplot(train_data, aes(x = factor(Alcoholindex), fill = factor(healthstatus))) +
-  geom_bar(position = "fill") +
-  labs(title = "Health Status Proportions by Alcohol Index", 
-       x = "Alcohol Index", 
-       y = "Proportion",
-       fill = "Health Status") +
-  scale_fill_manual(values = c("0" = "red", "1" = "green"),
-                    labels = c("Unhealthy", "Healthy")) +
-  my_theme
-
-p5 <- ggplot(train_data, aes(x = factor(Drugsindex), fill = factor(healthstatus))) +
-  geom_bar(position = "fill") +
-  labs(title = "Health Status Proportions by Drug Index", 
-       x = "Drug Index", 
-       y = "Proportion",
-       fill = "Health Status") +
-  scale_fill_manual(values = c("0" = "red", "1" = "green"),
-                    labels = c("Unhealthy", "Healthy")) +
-  my_theme
-p7 <- ggplot(train_data, aes(x = factor(healthstatus), y = Alcoholindex, fill = factor(healthstatus))) +
-  geom_boxplot(alpha = 0.7) +
-  labs(title = "Alcohol Index Distribution by Health Status", 
-       x = "Health Status", 
-       y = "Alcohol Index",
-       fill = "Health Status") +
-  scale_fill_manual(values = c("0" = "red", "1" = "green"),
-                    labels = c("Unhealthy", "Healthy")) +
-  scale_x_discrete(labels = c("Unhealthy", "Healthy")) +
-  my_theme
-
-(p4 / p5) / p7 + plot_annotation(title = "Alcohol & Drug Indices vs Health Status")
-```
-
-
-
----
-# Logistic Regression: Predicting Health Status
-
-## Model Setup
-- **Predictors**: Alcohol Index + Drug Index
-- **Outcome**: Health Status (Healthy / Unhealthy)
-- **Algorithm**: Logistic Regression
-
-## Model Coefficients
-```{r model-coef, echo=FALSE}
-train_model <- train_data %>% mutate(across(c(Alcoholindex, Drugsindex, healthstatus), factor))
-model <- logistic_reg() %>% set_engine("glm") %>% fit(healthstatus ~ ., data = train_model)
-tidy(model) %>% kable(caption = "Logistic Regression Coefficients")
-```
-
----
----
-# Sleep & Health Analysis
-
-.pull-left[
-
 
 # Hello World
 
@@ -338,6 +193,27 @@ $$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
 ```
 
 $$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
+
+Limitations:
+
+1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
+
+1. There should not be spaces after the opening `$` or before the closing `$`.
+
+1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
+
+---
+
+# Feeling adventurous?
+
+- Want to find out more about `xaringan`? See https://slides.yihui.name/xaringan/#1.
+
+- You are welcome to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
+
+- But some of you might want to play around with slide styling. The 
+`xaringanthemer` provides some solutions for this that: https://pkg.garrickadenbuie.com/xaringanthemer.
+
+- And if you want more bells and whistles, there is also `xaringanExtra`: https://pkg.garrickadenbuie.com/xaringanExtra.
 
 Limitations:
 

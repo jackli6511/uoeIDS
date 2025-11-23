@@ -3,8 +3,8 @@
   <head>
     <title>IDS investigation worksheet</title>
     <meta charset="utf-8" />
-    <meta name="author" content="by IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong" />
-    <meta name="date" content="2025-11-21" />
+    <meta name="author" content="IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong" />
+    <meta name="date" content="2025-11-23" />
     <script src="libs/header-attrs-2.30/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -15,20 +15,26 @@ class: center, middle, inverse, title-slide
 .title[
 # IDS investigation worksheet
 ]
-.subtitle[
-## Presentation subtitle (if any)
-]
 .author[
-### by IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong
+### IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong
 ]
 .institute[
 ### University of Edinburgh
 ]
 .date[
-### 2025-11-21
+### 2025-11-23
 ]
 
 ---
+
+
+
+
+
+
+
+
+
 
 
 
@@ -44,15 +50,74 @@ class: center, middle, inverse, title-slide
 
 class: center, middle
 
-## A statement of the overall goal / research question
+## Health Investigation: Alcohol, Drugs, and Sleep
+## NHANES Dataset Analysis
+
+&lt;span style="font-size: 28px;"&gt;1. How do alcohol and drug use impact health status?&lt;/span&gt;
+
+
+&lt;span style="font-size: 28px;"&gt;2. What is the relationship between sleep duration, sleep trouble, and health?&lt;/span&gt;
+
+
 
 ---
+# Data &amp; Variable Encoding
 
-class: inverse, center, middle
+## Data Source
+- **NHANES Dataset** (National Health and Nutrition Examination Survey) – a U.S. national health survey with demographic, health, and lifestyle data.
 
-# Section title
+## Key Variables
+| Variable         | Encoding Logic                                  |
+|------------------|-------------------------------------------------|
+| Health Status    | ≤14 unhealthy days → *Healthy (1)*; ≥15 → *Unhealthy (0)* |
+| Alcohol Index    | 0 (no alcohol) → 1 (≤52 days) → 2 (≤104 days) → 3 (≤156 days) → 4 (&gt;156 days) |
+| Drug Index       | 0 (no use) → 1 (marijuana only) → 2 (hard drugs / both) |
+| Sleep Duration   | Short (&lt;6h), Normal (6-8h), Long (&gt;8h)          |
+| Sleep Trouble    | 0 (no), 1 (yes)                                 |
 
 ---
+# Distribution of Core Variables
+
+&lt;img src="presentation_files/figure-html/var-dist-1.png" width="80%" /&gt;
+
+---
+# Alcohol Index &amp; Health Status
+#Drug Index &amp; Health Status
+
+&lt;img src="presentation_files/figure-html/alcohol-drug-health-plots-1.png" width="80%" /&gt;
+
+
+
+---
+# Logistic Regression: Predicting Health Status
+
+## Model Setup
+- **Predictors**: Alcohol Index + Drug Index
+- **Outcome**: Health Status (Healthy / Unhealthy)
+- **Algorithm**: Logistic Regression
+
+## Model Coefficients
+
+Table: Logistic Regression Coefficients
+
+|term          |   estimate| std.error| statistic|   p.value|
+|:-------------|----------:|---------:|---------:|---------:|
+|(Intercept)   |  0.5992732| 0.4657185|  1.286771| 0.1981740|
+|ID            |  0.0000117| 0.0000074|  1.594793| 0.1107585|
+|Drugsindex1   | -0.4590200| 0.1216783| -3.772406| 0.0001617|
+|Drugsindex2   | -0.2479073| 0.1786509| -1.387663| 0.1652397|
+|Drugsindex3   | -0.7167587| 0.1159118| -6.183656| 0.0000000|
+|Alcoholindex1 |  0.3272405| 0.1224440|  2.672572| 0.0075272|
+|Alcoholindex2 |  0.7801917| 0.1799302|  4.336080| 0.0000145|
+|Alcoholindex3 |  0.5100681| 0.1970118|  2.589023| 0.0096249|
+|Alcoholindex4 |  0.4609091| 0.1590345|  2.898171| 0.0037535|
+
+---
+---
+# Sleep &amp; Health Analysis
+
+.pull-left[
+
 
 # Hello World
 

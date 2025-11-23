@@ -192,8 +192,6 @@ auc_value
 ```
 
 ```{r load-data}
-
-# load your data
 data("NHANES")
 data("NHANES", package="NHANES")
 write.csv(NHANES, "data/NHANES.csv", row.names = FALSE)
@@ -262,7 +260,6 @@ p6<-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
 p6
 set.seed(123)
 
-# Make sure Trouble is a factor (done above, but just to be safe)
 data_end <- data_end %>%
   mutate(Trouble = factor(Trouble, levels = c("No Trouble", "Trouble")))
 data_split <- initial_split(data_end, prop = 0.7, strata = Trouble)

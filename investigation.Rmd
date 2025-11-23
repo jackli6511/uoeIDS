@@ -236,5 +236,61 @@ data_end <- data_cl %>% select(
 )
 
 data_end
+data_end <- data_end %>%
+  mutate(Trouble = factor(Trouble, levels = c(0, 1),
+                          labels = c("No Trouble", "Trouble")))
+ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+  geom_bar() +
+  labs(
+    title = "Sleep Trouble by Sleep Duration Category",
+    x = "Sleep Duration Category",
+    y = "Count",
+    fill = "Sleep Trouble"
+  ) +
+  theme_minimal()
+ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Proportion with Sleep Trouble by Sleep Duration Category",
+    x = "Sleep Duration Category",
+    y = "Proportion",
+    fill = "Sleep Trouble"
+  ) +
+  theme_minimal()
+set.seed(123)
+
+# Make sure Trouble is a factor (done above, but just to be safe)
+data_end <- data_end %>%
+  mutate(Trouble = factor(Trouble, levels = c("No Trouble", "Trouble")))
+data_split <- initial_split(data_end, prop = 0.7, strata = Trouble)
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+sleep_rec <- recipe(Trouble ~ DaysPhysHlthBad + DaysMentHlthBad + SleepHrsNight + SleepCat,
+                    data = train_data) %>%
+  step_dummy(all_nominal_predictors())
+log_spec <- logistic_reg(mode = "classification") %>%
+  set_engine("glm")
+sleep_wf <- workflow() %>%
+  add_recipe(sleep_rec) %>%
+  add_model(log_spec)
+
+sleep_fit <- fit(sleep_wf, data = train_data)
+test_preds <- predict(sleep_fit, test_data, type = "prob") %>%
+  bind_cols(test_data)
+roc_df <- roc_curve(test_preds,
+                    truth = Trouble,       
+                    .pred_Trouble)          
+
+autoplot(roc_df) +
+  labs(
+    title = "ROC Curve for Sleep Trouble Model",
+    x = "1 - Specificity",
+    y = "Sensitivity"
+  )
+
+roc_auc(test_preds,
+        truth = Trouble,
+        .pred_Trouble)
 
 ```

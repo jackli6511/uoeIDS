@@ -85,10 +85,10 @@ p2 <- ggplot(train_data, aes(x = factor(Drugsindex))) +
 
 p3 <- ggplot(train_data, aes(x = factor(healthstatus))) +
   geom_bar(fill = "darkgreen", alpha = 0.8) +
-  labs(title = "Health Status Distribution", x = "Health Status (0=Unhealthy, 1=Healthy)",          y="Frequency") +
+  labs(title = "HealthStatusDistribution", x = "Health Status",          y="Frequency") +
   my_theme
-(p1 | p2 | p3) + plot_annotation(title = "Variable Distribution Overview")
-
+pa<-(p1 | p2 | p3) + plot_annotation(title = "Variable Distribution Overview")
+pa
 p4 <- ggplot(train_data, aes(x = factor(Alcoholindex), fill = factor(healthstatus))) +
   geom_bar(position = "fill") +
   labs(title = "Health Status Proportions by Alcohol Index", 
@@ -108,8 +108,8 @@ p5 <- ggplot(train_data, aes(x = factor(Drugsindex), fill = factor(healthstatus)
   scale_fill_manual(values = c("0" = "red", "1" = "green"),
                     labels = c("Unhealthy", "Healthy")) +
   my_theme
-p4 / p5
-
+pb<-p4 / p5
+pb
 p7 <- ggplot(train_data, aes(x = factor(healthstatus), y = Alcoholindex, fill = factor(healthstatus))) +
   geom_boxplot(alpha = 0.7) +
   labs(title = "Alcohol Index Distribution by Health Status", 
@@ -131,8 +131,8 @@ p8 <- ggplot(train_data, aes(x = factor(healthstatus), y = Drugsindex, fill = fa
                     labels = c("Unhealthy", "Healthy")) +
   scale_x_discrete(labels = c("Unhealthy", "Healthy")) +
   my_theme
-p7 / p8
-
+pc<-p7 / p8
+pc
 train_data <- train_data %>%
   mutate(
     Alcoholindex = factor(Alcoholindex),
@@ -185,7 +185,10 @@ auc_value <- test_predictions %>%
     event_level = "second"
   )
 auc_value
-
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p1.png",plot=pa)
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p2.png",plot=pb)
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p3.png",plot=pc)
+ggsave("C:/Users/Jack/Documents/uoeIDS/img/p4.png",plot=roc_plot)
 ```
 
 ```{r load-data}
@@ -233,5 +236,61 @@ data_end <- data_cl %>% select(
 )
 
 data_end
+data_end <- data_end %>%
+  mutate(Trouble = factor(Trouble, levels = c(0, 1),
+                          labels = c("No Trouble", "Trouble")))
+ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+  geom_bar() +
+  labs(
+    title = "Sleep Trouble by Sleep Duration Category",
+    x = "Sleep Duration Category",
+    y = "Count",
+    fill = "Sleep Trouble"
+  ) +
+  theme_minimal()
+ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Proportion with Sleep Trouble by Sleep Duration Category",
+    x = "Sleep Duration Category",
+    y = "Proportion",
+    fill = "Sleep Trouble"
+  ) +
+  theme_minimal()
+set.seed(123)
+
+# Make sure Trouble is a factor (done above, but just to be safe)
+data_end <- data_end %>%
+  mutate(Trouble = factor(Trouble, levels = c("No Trouble", "Trouble")))
+data_split <- initial_split(data_end, prop = 0.7, strata = Trouble)
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+sleep_rec <- recipe(Trouble ~ DaysPhysHlthBad + DaysMentHlthBad + SleepHrsNight + SleepCat,
+                    data = train_data) %>%
+  step_dummy(all_nominal_predictors())
+log_spec <- logistic_reg(mode = "classification") %>%
+  set_engine("glm")
+sleep_wf <- workflow() %>%
+  add_recipe(sleep_rec) %>%
+  add_model(log_spec)
+
+sleep_fit <- fit(sleep_wf, data = train_data)
+test_preds <- predict(sleep_fit, test_data, type = "prob") %>%
+  bind_cols(test_data)
+roc_df <- roc_curve(test_preds,
+                    truth = Trouble,       
+                    .pred_Trouble)          
+
+autoplot(roc_df) +
+  labs(
+    title = "ROC Curve for Sleep Trouble Model",
+    x = "1 - Specificity",
+    y = "Sensitivity"
+  )
+
+roc_auc(test_preds,
+        truth = Trouble,
+        .pred_Trouble)
 
 ```

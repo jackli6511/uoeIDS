@@ -20,6 +20,7 @@ library(tidyverse)
 library(NHANES)
 library(patchwork)
 library(tidymodels)
+library(knitr)
 ```
 
 
@@ -161,7 +162,8 @@ test_predictions <- predict(model_fit, new_data = test_data, type = "prob") %>%
     test_data %>% select(healthstatus)
   )
 test_predictions
-
+ho<-kable(test_predictions,format="html")
+cat(ho,file="test_predictions.html")
 roc_curve <- test_predictions %>%
   roc_curve(
     truth = healthstatus,

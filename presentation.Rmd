@@ -80,27 +80,23 @@ include_graphics("img/p4.png")
 # Distribution 
 
 ```{r p5, echo = FALSE, out.width = "55%", fig.align = "center"}
-include_graphics("img/p5.png")
+include_graphics("img/p8.png")
 ```
 
 ---
-# Distribution 
+# ROC
 
 ```{r p6, echo = FALSE, out.width = "55%", fig.align = "center"}
-include_graphics("img/p6.png")
-```
-
----
-# Distribution 
-
-```{r p7, echo = FALSE, out.width = "55%", fig.align = "center"}
-include_graphics("img/p7.png")
+include_graphics("img/p9.png")
 ```
 
 ---
 
-# Hello World
 
-- Click the `Knit` button to compile your presentation
+# Summary
 
-- Make sure to commit and push all resulting files to your GitHub repo
+- Purpose
+
+- Method and Findings
+
+- Future 

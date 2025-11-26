@@ -1,5 +1,5 @@
 ---
-title: "IDS investigation worksheet"
+title: "The Factors Influence Health"
 author: "by IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang, Yunuo Geng, Zhuoyue Dong"
 date: "`r Sys.Date()`"
 output: html_document
@@ -290,4 +290,6 @@ p_roc
 roc_auc(test_preds,
         truth = HealthStatus,
         .pred_PoorHealth)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p8.png",plot=p_bar)
+#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p9.png",plot=p_roc)
 ```

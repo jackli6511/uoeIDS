@@ -195,10 +195,15 @@ auc_value
 
 ```{r load-daa}
 data("NHANES")
-data("NHANES", package="NHANES")
+data("NHANES", package = "NHANES")
 write.csv(NHANES, "data/NHANES.csv", row.names = FALSE)
 
 health <- read.csv("data/NHANES.csv")
+
+library(dplyr)
+library(ggplot2)
+library(tidymodels)
+library(scales) 
 
 data_r <- health %>% select(
   ID,
@@ -207,93 +212,82 @@ data_r <- health %>% select(
   SleepHrsNight,
   SleepTrouble
 )
- 
+
 data_cl <- data_r %>% drop_na()
 
-
-data_cl <- data_cl %>% mutate(
-  Trouble = case_when(
-    SleepTrouble == "No"  ~ 0,
-    SleepTrouble == "Yes" ~ 1
+data_cl <- data_cl %>%
+  mutate(
+    HealthBad = DaysPhysHlthBad + DaysMentHlthBad
+  ) %>%
+  mutate(
+    SleepCat = case_when(
+      SleepHrsNight < 6 ~ "Short",
+      SleepHrsNight >= 6 & SleepHrsNight <= 8 ~ "Normal",
+      SleepHrsNight > 8 ~ "Long"
+    )
+  ) %>%
+  mutate(
+    SleepTrouble = factor(SleepTrouble, levels = c("No", "Yes"),
+                          labels = c("No Trouble", "Trouble"))
   )
-)
 
-data_cl <- data_cl %>% mutate(
-  SleepCat = case_when(
-    SleepHrsNight < 6 ~ "Short",
-    SleepHrsNight >= 6 & SleepHrsNight <= 8 ~ "Normal",
-    SleepHrsNight > 8 ~ "Long"
+data_cl <- data_cl %>%
+  mutate(
+    HealthStatus = if_else(HealthBad > 0, "PoorHealth", "GoodHealth"),
+    HealthStatus = factor(HealthStatus, levels = c("GoodHealth", "PoorHealth"))
   )
-)
 
-data_end <- data_cl %>% select(
-  ID,
-  DaysPhysHlthBad,
-  DaysMentHlthBad,
-  SleepHrsNight,
-  Trouble,
-  SleepCat
-)
-
-data_end
-data_end <- data_end %>%
-  mutate(Trouble = factor(Trouble, levels = c(0, 1),
-                          labels = c("No Trouble", "Trouble")))
-p5<-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
-  geom_bar() +
-  labs(
-    title = "Sleep Trouble by Sleep Duration Category",
-    x = "Sleep Duration Category",
-    y = "Count",
-    fill = "Sleep Trouble"
-  ) +
-  theme_minimal()
-p5
-p6<-ggplot(data_end, aes(x = SleepCat, fill = Trouble)) +
+data_end <- data_cl %>%
+  select(
+    ID,
+    HealthBad,
+    HealthStatus,
+    SleepHrsNight,
+    SleepTrouble,
+    SleepCat
+  )
+p_bar <- ggplot(data_end, aes(x = SleepCat, fill = HealthStatus)) +
   geom_bar(position = "fill") +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = percent) +
   labs(
-    title = "Proportion with Sleep Trouble by Sleep Duration Category",
+    title = "Proportion of Poor Health by Sleep Duration Category",
     x = "Sleep Duration Category",
     y = "Proportion",
-    fill = "Sleep Trouble"
+    fill = "Health Status"
   ) +
   theme_minimal()
-p6
+
+p_bar
 set.seed(123)
 
-data_end <- data_end %>%
-  mutate(Trouble = factor(Trouble, levels = c("No Trouble", "Trouble")))
-data_split <- initial_split(data_end, prop = 0.7, strata = Trouble)
+data_split <- initial_split(data_end, prop = 0.7, strata = HealthStatus)
 train_data <- training(data_split)
 test_data  <- testing(data_split)
-sleep_rec <- recipe(Trouble ~ DaysPhysHlthBad + DaysMentHlthBad + SleepHrsNight + SleepCat,
-                    data = train_data) %>%
+health_rec <- recipe(HealthStatus ~ SleepHrsNight + SleepTrouble + SleepCat,
+                     data = train_data) %>%
   step_dummy(all_nominal_predictors())
-log_spec <- logistic_reg(mode = "classification") %>%
+health_spec <- logistic_reg(mode = "classification") %>%
   set_engine("glm")
-sleep_wf <- workflow() %>%
-  add_recipe(sleep_rec) %>%
-  add_model(log_spec)
+health_wf <- workflow() %>%
+  add_recipe(health_rec) %>%
+  add_model(health_spec)
 
-sleep_fit <- fit(sleep_wf, data = train_data)
-test_preds <- predict(sleep_fit, test_data, type = "prob") %>%
+health_fit <- fit(health_wf, data = train_data)
+test_preds <- predict(health_fit, test_data, type = "prob") %>%
   bind_cols(test_data)
 roc_df <- roc_curve(test_preds,
-                    truth = Trouble,       
-                    .pred_Trouble)          
+                    truth = HealthStatus,
+                    .pred_PoorHealth)
 
-roc2<-autoplot(roc_df) +
+p_roc <- autoplot(roc_df) +
   labs(
-    title = "ROC Curve for Sleep Trouble Model",
+    title = "ROC Curve for HealthStatus Model",
     x = "1 - Specificity",
     y = "Sensitivity"
   )
-roc2
+
+p_roc
 roc_auc(test_preds,
-        truth = Trouble,
-        .pred_Trouble)
-#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p5.png",plot=p5)
-#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p6.png",plot=p6)
-#ggsave("C:/Users/Jack/Documents/uoeIDS/img/p7.png",plot=roc2)
+        truth = HealthStatus,
+        .pred_PoorHealth)
 ```

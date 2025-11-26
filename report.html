@@ -13,7 +13,7 @@
 
 <meta name="date" content="2025-11-26" />
 
-<title>IDS investigation worksheet</title>
+<title>Predicting Health Status from Lifestyle Factors: A Comprehensive Analysis of NHANES Data</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,7 +350,8 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">IDS investigation worksheet</h1>
+<h1 class="title toc-ignore">Predicting Health Status from Lifestyle
+Factors: A Comprehensive Analysis of NHANES Data</h1>
 <h4 class="author">by IDS-Handsome Yue : Zhengxun Li, Jiun-Shi Huang,
 Yunuo Geng, Zhuoyue Dong</h4>
 <h4 class="date">2025-11-26</h4>
@@ -360,47 +361,206 @@ Yunuo Geng, Zhuoyue Dong</h4>
 
 <div id="research-question" class="section level2">
 <h2>Research Question</h2>
-<p>Describe your research question here. Include why this question might
-be of interest.</p>
+<p>This comprehensive investigation addresses two distinct predictive
+questions regarding the relationship between modifiable lifestyle
+factors and general health status.First, to what extent can documented
+patterns of alcohol consumption and illicit drug use serve as reliable
+predictors of an individual’s overall health status classification?
+Second, can measurable aspects of sleep behavior—specifically, sleep
+duration and self-reported sleep troubles—provide meaningful predictive
+power for determining health status? These questions are particularly
+relevant for public health initiatives aimed at developing early warning
+systems for health risks using accessible behavioral indicators.
+Understanding the relative strength and limitations of these predictive
+relationships offers valuable insights for strategic resource allocation
+in preventive healthcare programs and contributes to evidence-based
+approaches for targeted health promotion interventions.</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>Briefly describe your dataset here - include a description of the key
-variables you will be investigating. Include a citation for your data.
-See <a href="http://libraryguides.vu.edu.au/c.php?g=386501&amp;p=4347840" class="uri">http://libraryguides.vu.edu.au/c.php?g=386501&amp;p=4347840</a>
-for guidance on proper citation for datasets. If you got your data off
-the web, make sure to state the retrieval date.</p>
+<p>The analysis utilized data from the National Health and Nutrition
+Examination Survey(NHANES), a nationally representative research program
+conducted by the National Center for Health Statistics under the Centers
+for Disease Control and Prevention. NHANES employs a sophisticated
+multistage, stratified probability sampling design to ensure accurate
+representation of the non-institutionalized civilian population in the
+United States. The survey collects comprehensive data through detailed
+household interviews, standardized physical examinations in mobile
+examination centers, and extensive laboratory testing, providing a
+robust foundation for epidemiological investigation.</p>
+<p>Data Retrieval Date: October 17, 2025</p>
+<p>Key Variables and Operational Definitions:</p>
+<p>The primary outcome variable was a binary health status
+classification constructed from two existing NHANES
+variables:DaysPhysHlthBad (number of days physical health was not good
+in past 30 days) and DaysMentHlthBad (number of days mental health was
+not good in past 30 days). These were summed to create a “Total
+Unhealthy Days” measure, with individuals reporting ≤14 days classified
+as “Healthy” and those reporting &gt;14 days classified as “Unhealthy.”
+This threshold was selected based on clinical relevance, representing
+the point at which individuals experience unhealthy symptoms on more
+than half of the days in a typical month.</p>
+<p>Predictor variables were organized into two distinct sets. For
+substance use analysis, we included AlcoholYear (number of days alcohol
+consumed in past year), RegularMarij (regular marijuana use), and
+HardDrugs (use of cocaine, heroin, or methamphetamine). For sleep
+factors analysis, we utilized SleepHrsNight (self-reported average hours
+of sleep per night) and SleepTrouble (experience of sleep trouble).</p>
+<p>Feature Engineering and Derived Variables:</p>
+<p>To enhance analytical tractability,we created several composite
+indices. The Drug Index represented a 0-3 ordinal scale combining
+RegularMarij and HardDrugs, with higher values indicating more
+substantial drug use patterns. The Alcohol Index constituted a 0-4
+ordinal scale categorizing annual consumption frequency into clinically
+meaningful ranges. Sleep Categories followed National Sleep Foundation
+recommendations, classifying sleep duration as Short (&lt;6 hours),
+Normal (6-8 hours), or Long (&gt;8 hours).</p>
 </div>
 <div id="findings" class="section level2">
 <h2>Findings</h2>
-<p>The write-up of your project and findings go here.</p>
-<p>Think of this as the text of your presentation with some extra detail
-to cover what there was not time to discuss in the presentation. This
-might include any assumptions you made when doing your analysis, any
-limitations of the work you have done or any ideas you have for future
-work. Feel free to split this section into subsections to make it easier
-to read.</p>
-<p>The length should be roughly 1,500 words. If you want to use a word
-count addin, you can install this by copying and pasting the following
-into RStudio:</p>
-<p><code>devtools::install_github(&quot;benmarwick/wordcountaddin&quot;, type = &quot;source&quot;, dependencies = TRUE)</code></p>
-<p>You will then need to restart RStudio. Once you have done that,
-select the text you want to count the words of, go to Addins, and select
-the <code>Word count</code> addin. This addin counts words using two
-different algorithms, but the results should be similar and as long as
-you’re in the ballpark of 1,500 words, you’re good! The addin will
-ignore code chunks and only count the words in prose. If you don’t want
-to use the addin you can always copy and paste the text into Microsoft
-Word to do a Word Count!</p>
-<p>You can also load your data here and present any analysis results /
-plots. Make sure to hide your code with <code>echo = FALSE</code> unless
-the point you are trying to make is about the code itself, in which case
-you should show your code.</p>
+<p>Methodology</p>
+<p>Our analytical approach followed a rigorous data science workflow
+designed to ensure reproducibility and validity.The process began with
+comprehensive data preprocessing, where the dataset was subset to
+relevant variables, and records with missing values for any key
+variables were removed using complete-case analysis. This resulted in a
+consistent analytical sample for all subsequent modeling.</p>
+<p>The processed dataset was partitioned using an 80/20 train-test split
+with stratification by the health status outcome variable. This approach
+maintains the distribution of the outcome variable across both subsets,
+providing robust protection against sampling bias and enabling reliable
+estimation of model performance on unseen data.</p>
+<p>We developed two distinct logistic regression models to address our
+research questions separately. Model 1 (Substance Use) predicted health
+status using AlcoholIndex and DrugIndex, while Model 2 (Sleep Factors)
+utilized SleepTrouble and SleepCat as predictors. Logistic regression
+was selected for its interpretability, statistical properties, and
+appropriateness for binary classification tasks. Model performance was
+evaluated exclusively on the held-out test set using the Area Under the
+Receiver Operating Characteristic Curve (ROC-AUC) as the primary metric.
+AUC provides a comprehensive measure of a model’s ability to
+discriminate between classes across all possible classification
+thresholds, with values ranging from 0.5 (random performance) to 1.0
+(perfect discrimination). We also examined model calibration and
+conducted sensitivity analyses to ensure robust findings.</p>
+<p>All analyses were implemented in R version 4.5.1, utilizing the
+tidyverse ecosystem for data manipulation, the tidymodels framework for
+modeling workflows, and the NHANES package for data access.
+Computational reproducibility was ensured through version control and
+detailed documentation of all analytical decisions.</p>
+<p>Results</p>
+<p>Substance Use Prediction Model</p>
+<p>Exploratory analysis of substance use patterns revealed distinctive
+distributions in the training data.The AlcoholIndex displayed a
+pronounced right-skew, indicating that most participants reported
+low-to-moderate consumption frequencies. The DrugIndex distribution was
+even more concentrated, with the majority of participants at the lowest
+level, confirming that regular use of marijuana or hard drugs represents
+a less common behavior in this nationally representative sample.</p>
+<p>The fitted logistic regression model demonstrated statistically
+significant relationships between both substance use indices and health
+status (p &lt; 0.001 for both AlcoholIndex and DrugIndex). The negative
+coefficient signs indicated that higher values on both indices
+associated with decreased probability of being classified as healthy,
+consistent with dose-response relationships observed in the literature.
+Model diagnostics indicated adequate fit, with no concerning
+multicollinearity between predictors.</p>
+<p>When evaluated on the test set, the model achieved an AUC of 0.572.
+According to established interpretive guidelines for AUC values, this
+falls within the range of poor to acceptable discrimination. This
+performance represents a 14.4% improvement over random classification,
+suggesting that while substance use patterns contain statistically
+significant predictive information, their practical utility for accurate
+individual-level health status classification remains substantially
+limited.</p>
+<p>Sleep Factors Prediction Model</p>
+<p>Analysis of sleep-related variables showed that most participants
+reported normal sleep duration,while substantial minorities reported
+short or long sleep duration. A significant proportion of the sample
+indicated experiencing sleep troubles, highlighting the population
+prevalence of sleep quality issues.</p>
+<p>Visualization of health status across sleep categories revealed a
+clear U-shaped relationship. Poor health prevalence was highest among
+short sleepers, lowest among normal sleepers, and notably elevated again
+among long sleepers. This pattern persisted across subgroups and
+suggests that both insufficient and excessive sleep associate with
+poorer health outcomes. Participants reporting sleep troubles showed
+consistently worse health outcomes regardless of sleep duration
+category.</p>
+<p>The fitted logistic regression model for sleep factors achieved an
+AUC of 0.434 on the test set. This value indicates very limited
+discriminative ability, performing worse than random classification for
+substantial portions of the ROC curve. This suggests that the measured
+sleep factors, as captured in this dataset and modeled using this
+approach, provide minimal standalone predictive power for the defined
+health status outcome.</p>
+<p>Discussion</p>
+<p>The overarching finding of this investigation is the demonstrably
+limited predictive power of both substance use and sleep factors when
+used in isolation to predict individual health status.The AUC values
+lead to several important conclusions. While substance use patterns show
+statistically significant associations with health status, their
+practical utility for individual prediction is constrained. Sleep
+factors demonstrate even more limited predictive value.</p>
+<p>These results fundamentally reflect the complex, multifactorial
+nature of health status determination. Health emerges from dynamic
+interactions among genetic predisposition, socioeconomic factors,
+environmental exposures, healthcare access, and numerous behavioral
+determinants beyond the two domains examined here. Our models, which
+intentionally isolated specific behavioral factors, consequently explain
+only a modest portion of the total variance in health outcomes. The
+superior performance of the substance use model aligns with extensive
+literature documenting associations between substance abuse and diverse
+negative health outcomes. However, the modest AUC value serves as an
+important caution against over-reliance on these factors alone for
+individual-level clinical decision-making or risk assessment. The
+unexpectedly poor performance of the sleep factors model may be
+attributed to methodological factors, including the limitations of
+single-item self-report measures and the cross-sectional design’s
+inability to establish temporal precedence.</p>
+<p>Limitations</p>
+<p>Several important limitations warrant acknowledgment.The
+cross-sectional observational design fundamentally prevents causal
+inference about the relationships between lifestyle factors and health
+status. The reliance on self-reported data introduces potential for
+recall bias and social desirability bias, particularly for illicit drug
+use. Our created indices, while practical for analysis, necessarily
+simplify complex behavioral patterns and may obscure nuanced
+relationships. Unmeasured confounding represents a substantial concern,
+as factors such as socioeconomic status, stress exposure, and physical
+activity levels were not adjusted for in these models.</p>
+<p>Ethical Considerations</p>
+<p>Although this research utilized de-identified,publicly available data
+collected with appropriate ethical oversight, important ethical
+considerations persist. Findings must be communicated responsibly to
+avoid stigmatization of individuals or groups based on lifestyle
+characteristics. Results should inform supportive, evidence-based public
+health interventions focused on education and resource provision rather
+than discriminatory policies or practices.</p>
+<p>Conclusion</p>
+<p>This comprehensive analysis demonstrates that substance use patterns
+provide statistically significant but practically limited predictive
+power for health status classification,while commonly measured sleep
+factors show minimal standalone predictive utility. These findings
+underscore the complex etiology of health status and highlight the
+limitations of single-domain prediction models. Future research should
+pursue integrated modeling approaches, longitudinal designs, and more
+sophisticated measurement strategies to advance our understanding of
+health determinants.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
-<p>List any references here. You should, at a minimum, list your data
-source.</p>
+<ol style="list-style-type: decimal">
+<li>National Center for Health Statistics. National Health and Nutrition
+Examination Survey Data. Hyattsville, MD: U.S. Department of Health and
+Human Services, Centers for Disease Control and Prevention.</li>
+<li>R Core Team (2021). R: A language and environment for statistical
+computing. R Foundation for Statistical Computing, Vienna, Austria.</li>
+<li>Wickham H et al. (2019). “Welcome to the tidyverse.” Journal of Open
+Source Software, 4(43), 1686.</li>
+<li>Hosmer, D.W., Lemeshow, S., &amp; Sturdivant, R.X. (2013). Applied
+Logistic Regression (3rd ed.). Wiley.</li>
+</ol>
 </div>
 
 

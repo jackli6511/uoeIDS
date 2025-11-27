@@ -90,7 +90,7 @@ include_graphics("img/p8.png")
 ```{r p6, echo = FALSE, out.width = "55%", fig.align = "center"}
 include_graphics("img/p9.png")
 ```
-
+-AUC value:0.434
 ---
 
 
